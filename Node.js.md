@@ -90,3 +90,57 @@
 	
 ```
 
+##### 创建一个服务器流程
+
+```
+1.引入http模块
+
+let http = require('http')
+let url = requier('url')//路径模块
+let util = requier('util')//util模块是一类包罗万象的模块 
+//创建一个server服务器
+let server = http.createServer((req,res) => {
+	res.statusCode = 200 //返回状态码
+	res.setHeader('Content-Type', 'text/p;ain; charset=utf-8')//设置响应头
+	//res.end('hello,node.js')//响应输出
+	res.end(url.parse(req.url))
+})
+//server.listen 监听端口
+server.listen(3000, '127.0.0.1', ()=>{
+	console.log('服务器运行成功')
+})
+
+
+2.加载静态资源
+
+let http = require('http')
+let url = requier('url')//路径模块
+let util = requier('util')//util模块是一类包罗万象的模块 
+let fs = requier('fs')//引入文件模块
+//创建一个server服务器
+let server = http.createServer((req,res) => {
+	//目的返回一个index.html 的文件
+	var pathName = url.parse(req.url).pathname;//获取浏览器URL中路径最终文件名
+	console.log("file:"+ pathName.substring(1))//去掉 / 斜杠
+    var newpathname =  pathName.substring(1)//去掉 / 斜杠
+	fs.readFile(newpathname, (err, data) =>{//fs.readFile读取文件
+		if(err){
+			res.writeHead(404, {
+				'Content-Type': 'text/html'
+			})
+		}else{
+			res.writeHead(200, {
+				'Content-Type': 'text/html'
+			})
+			res.write(data.toString())
+		}
+		
+		res.end()
+	})
+})
+//server.listen 监听端口
+server.listen(3000, '127.0.0.1', ()=>{
+	console.log('服务器运行成功')
+})
+```
+
