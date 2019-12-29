@@ -72,25 +72,7 @@
 			module.exports = 成员
 ```
 
-
-
-### express框架
-
-```
-1.》查express版本 express --version
-2.》全局安装express生成器命令 npm i -g express-generator
-3.》创建一个express项目 ，在项目目录下命令 express server
-	目录内容如下
-	bin 文件夹，可执行文件
-	pubilc 静态资源文件夹
-	routes 路由文件
-	view 文件
-	app.js 入口文件
-	
-	
-```
-
-##### 创建一个服务器流程
+##### 创建服务器流程
 
 ```
 1.引入http模块
@@ -122,7 +104,7 @@ let server = http.createServer((req,res) => {
 	//目的返回一个index.html 的文件
 	var pathName = url.parse(req.url).pathname;//获取浏览器URL中路径最终文件名
 	console.log("file:"+ pathName.substring(1))//去掉 / 斜杠
-    var newpathname =  pathName.substring(1)//去掉 / 斜杠
+    var newpathname =  pathName.substring(1)//去掉 / 斜杠 
 	fs.readFile(newpathname, (err, data) =>{//fs.readFile读取文件
 		if(err){
 			res.writeHead(404, {
@@ -143,4 +125,26 @@ server.listen(3000, '127.0.0.1', ()=>{
 	console.log('服务器运行成功')
 })
 ```
+
+
+
+### express框架
+
+```
+1.》查express版本 express --version
+2.》全局安装express生成器命令 npm i -g express-generator
+3.》创建一个express项目 ，在项目目录下命令 express server
+	目录内容如下
+	bin 文件夹，可执行文件
+	pubilc 静态资源文件夹
+	routes 路由文件
+	view 文件
+	app.js 入口文件
+	
+	
+```
+
+##### 创建一个express服务器
+
+
 
