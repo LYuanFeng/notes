@@ -375,10 +375,77 @@ console.log(p1); //{name: "某敏", age: 18}
 
 
 
+### 回调函数
+
+```
+回调函数----》 一个函数是参数是个函数
+作用----》简化代码
+
+例子：2个参数，一个参数做了平方，一个参数加了10， 此时就有2个结果
+通常我们要这样做
+   function getSum(n1,n2){
+     var res1 = n1 * n1;
+     var res2 = n2 + 10;
+     return res1 + res2;//不同的地方
+   }
+
+   function getSub(n1,n2){
+     var res1 = n1 * n1;
+     var res2 = n2 + 10;
+     return  res1 - res2;//不同的地方
+   }
+  -----》发现代码冗余
+  
+  ---以下用回调函数方法
+    function sum(num1,num2){
+      return num1 + num2;
+    }
+
+    function sub(num1,num2){
+      return num1 - num2;
+    }
+
+    function getRes(n1,n2, fun){
+      var res1 = n1 * n1; //100
+      var res2 = n2 + 10; //60
+      if(f1 instanceof  Function){
+        return fun(res1,res2);
+      }
+    }
+    console.log(getRes(10, 50,  )); // 160 做加法
+    console.log(getRes(10, 50, sub)); // 40 做减法
+    
+```
 
 
 
+###  匿名函数 --》自调用函数
+
+```
+	//1.匿名函数 - 没有名字的函数
+    //  function (){
+    //    console.log("哈哈");
+    //  }
+
+    //2.匿名函数没有名字，也就意味着 ，匿名声明出来之后，没有办法用名字的方式来调用。
+    //如何来调用匿名函数呢？  自己调用自己
 
 
+    //3.如果一个匿名函数自己调用自己，就是自调用函数。
+    //3.1
+     (function (){
+       console.log("哈哈");
+     })();
+
+    //3.2 推荐使用
+    (function (){
+      console.log("嘿嘿");
+    }());
+
+
+    //4.自调用函数有什么用？
+    //a.如果一个函数声明出来仅仅只会被调用一次，就可以写一个自调用函数。
+    //b.js中只有函数才能分割作用域， 可以用自调用函数分割作用域。
+```
 
 
