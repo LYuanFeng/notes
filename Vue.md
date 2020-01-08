@@ -32,6 +32,90 @@
 
 
 
+### 关于Vue.use()
+
+```
+疑问：导入文件到Vue，有些需要Vue.use()，有些不需要。为什么呢？
+答案：要看导入的文件有没有install
+
+1. 作用：不需要像组件那样，每次使用他前都需要先引入一次。对于插件只要在最开始引入一次，在任何组件就可以直接使用。（即：为 Vue 添加全局功能）
+
+2. 使用场景：A.自定组件，全局使用。  B.自定义插件（有兴趣可发布上npm）
+
+3. 例子
+	3.1 需要use的插件文件--plugin.js
+    import testToast from './toast.vue'
+    let plugin = {
+		//vue暴露出来的一个扩展方法，在 install 方法里，添加我们插件内容。install默认方法			
+		//当外界在 use 这个组件的时候，就会调用本身的 install 方法，同时传一个Vue 这个类的参数。
+    	install (Vue, options) {
+    		//给vue注册一个全局属性
+    		Vue.prototype.$hi = '你好！' 
+    		
+    		//给vue注册一个全局方法
+            Vue.prototype.$arrLength = function (arr) { 
+				return this.arr.length
+            }
+            
+            //给vue添加一个全局组件
+            Vue.component(testToast.name, testToast) // testPanel.name 组件的name属性
+    	}
+    }
+    export default plugin
+	
+	3.2 需要导进去的全局组件-----toast.vue内容
+	<template>
+  	<div>***省略***</div>
+  	<template>
+  	<script>
+    export default {
+    // 这里需要注意下，采用的全局注入我们的组件，所以在后面因为我们的组件后，会直接使用这个name命名的标签
+    name: 'test-toast',   
+        data () {
+            return {
+            	checkedNumber: ''
+            }
+        }
+    }
+    
+    3.3 需要在-----main.js 全局import 
+    import Vue from 'vue'
+    import App from './App'
+    import router from './router'
+    import testPlugin from './plugin.js' //导入我们自定义插件
+    
+    Vue.use(testPlugin)//use步骤重要
+    
+    new Vue({
+    	el: '#app',
+    	router,
+    	components: {App},
+    	temlate: '<App/>'
+    })
+    
+    3.4 具体页面使用我们的插件-----haha.vue
+    <template>
+  	<div>
+  		<test-toast></test-toast>//之前全局注册的组件 toast.vue
+  	</div>
+  	<template>
+  	<script>
+    export default {
+    	name: 'haha',
+        data () {
+            return {
+            	testArr: ['jj', 'hh']
+            }
+        },
+        created() {
+         console.log(this.$hi)//会调用上面插件的属性
+         console.log(this.$arrLength(this.data.testArr))//会调用上面插件的方法
+        }
+    }
+```
+
+
+
 ### 创建webpack项目
 
 ```
@@ -482,13 +566,352 @@ Vue.http.interceptors.push((req,next)=>{
 
 
 
-###  Vuex 状态管理
+### Vue传值方式
+
+前言：七种传值方式为
+
+1. props -- 属性传值
+2. $refs -- 父组件获取子组件数据
+3. $parent -- 子组件获取父组件数据
+4. $emit - $on -- 通知传值(广播传值)
+5. Vuex -- 本地传值
+6. 路由传值
+7. provide与inject -- 子孙组件跨级访问父组件方法
+
+
+
+在介绍组件传值之前先明确三种组件关系：父子组件、兄弟组件、无关系组件
+
+![](E:\myProject\notes\img\Vue组件关系图.jpg)
+
+
+
+上图关系基于：A、B组件同一时刻只存其一的情况下，其中：
+
+
+
+- A是C、D、E的父组件，B是F、G、H的父组件
+- C、D、E是A的子组件，F、G、H是B的子组件
+- C和D、E是兄弟组件，F和G、H是兄弟组件。但E、F不是兄弟组件
+- A和B是无关系组件，E和F也是无关系组件
+
+
+
+#### 一、属性传值--props
+
+**1.可传值类型**
+
+- 固定值
+- 绑定属性
+- 方法
+- 本类对象
+
+
+
+**2.操作步骤**
+
+①.父组件调用子组件的时候，绑定动态属性   
+
+ <htitle mess="父组件给子组件传值"></htitle>
+
+②. 在子组件里边通过props,接收父组件传过来的值
+
+
+
+**3.适用场景**
+
+仅适用于 父组件给子组件传值
+
+
+
+**4.属性介绍**
+
+组件属性定义：
+
+```
+props:["mess","bindMsg","run","fatherThis"],
+```
+
+**子组件验证也可传入参数的合法性：**
+
+```
+props:{
+    'mess':String,
+    'bindMsg':[String, Number],
+    'run':Function, 
+    'fatherThis':Object,
+}
+```
+
+更多props请查看Vue官网:[https://cn.vuejs.org/v2/api/?#props](https://links.jianshu.com/go?to=https%3A%2F%2Fcn.vuejs.org%2Fv2%2Fapi%2F%3F%23props)
+
+
+
+**5.示例代码**
+
+父组件：
+
+```
+<template>
+  <div id="app">
+    <htitle mess="父组件给子组件传值了" :bindMsg="msg" :run="run" :fatherThis="this"></htitle>
+  </div>
+</template>
+```
+
+
+
+子组件：
+
+```
+<template>
+    <div class="divfirst">
+        <span>{{mess}}</span>
+        <h1>{{bindMsg}}</h1>
+        <button @click="run()">点击调用父组件方法</button>
+        <button @click="getPrasent()">点击获取父组件实体（实体拿到可以使用用父组件的方法和属性了）</button>
+    </div>
+</template>
+
+<script>
+export default {
+    props:{
+        'mess':String,
+        'bindMsg':[String, Number],
+        'run':Function, 
+        'fatherThis':Object,
+    },
+    data(){
+        return {}
+    },
+    methods:{
+        getPrasent(){
+            this.fatherThis.run();
+            alert(this.fatherThis.msg);
+        } 
+    }
+}
+</script>
+```
+
+
+
+#### 二：父组件获取子组件数据--$refs
+
+父组件通过$refs获取子组件的数据和方法
+
+**1.可获取类型**
+
+- 子组件属性
+- 子组件方法
+
+
+
+**2.操作步骤**
+
+1.调用子组件的时候调用一个ref
+ <v-fgsheader ref="header"></v-fgsheader>
+ 2.在父组件中通过
+ this.$refs.header.属性
+ this.$refs.header.方法
+
+
+
+**3.适用场景**
+
+子组件给父组件传值
+
+
+
+**4.示例代码**
+
+父组件
+
+```
+<template>
+    <div class="FGSHome">
+        <v-fgsheader ref="header"></v-fgsheader>
+        <button @click="getChildProp()">获取子组件的属性的值</button>
+        <button @click="getChildMethod()">获取子组件的方法</button>
+    </div>
+</template>
+
+<script>
+import FGSHeader from './FGSHeader.vue'
+    export default{
+
+        data(){
+            return { }
+        },
+        components:{
+            'v-fgsheader':FGSHeader,
+        },
+        methods: {
+          getChildProp(){
+              alert(this.$refs.header.msg);
+          },  
+          getChildMethod(){
+              this.$refs.header.run();
+          }
+        },
+    }
+</script>
+```
+
+
+
+子组件
+
+```
+<script>
+    export default{
+        data(){
+            return {
+                msg:"我是子组件header的值哟"
+            }
+        },
+        methods:{
+            run(){
+                alert("这是子组件Header的方法+"+this.msg);
+            }
+        }
+    }
+</script>
+```
+
+
+
+#### 三、子组件获取父组件数据--$parent
+
+子组件通过$parent获取父组件的数据和方法，这种传值方式实际上类似于上边的属性传值中父组件给子组件的传递了子类对象`this`,只不过Vue官方给封装好了。
+
+
+
+**1.可获取类型**
+
+- 父组件属性
+- 父组件方法
+
+
+
+**2.操作步骤**
+
+直接在子组件中使用`this.$parent.XX`，不需要做任何多余操作。
+
+
+
+**3.适用场景**
+
+父组件给子组件传值
+
+
+
+**4.示例代码**
+
+子组件
+
+```
+getFatherProp(){
+    alert(this.$parent.fatherMsg); 
+},
+getFatherMethod(){
+    this.$parent.fatherRun();
+}
+```
+
+
+
+#### 四、通知传值(广播传值) -- $emit - $on
+
+**1.可传值类型**
+
+Vue官网只写了`[...args]`，故通知/广播传值我们定为只传基本数据类型，不能传方法。
+
+
+
+**2.操作步骤**
+
+1、新建一个js文件   然后引入vue  实例化vue  最后暴露这个实例
+
+2、在要广播的地方引入刚才定义的实例
+
+3、通过 VueEmit.$emit('名称','数据')传播数据
+
+4、在接收收数据的地方通过 $on接收广播的数据
+ VueEmit.$on('名称',function(){})
+
+
+
+**3.适用场景**
+
+适用于父子组件、兄弟组件间进行传值。
+**注意**无关系组件不能用这种方式传值。(笔者理解是：对于上图中的A、B组件。假设A广播通知，B接收通知。挂载A的时候B卸载了，也就是说B被内存销毁了,B是接收不到广播的)
+
+
+
+**4.属性介绍**
+
+对于通知传值而言，可以一人广播，然后多者接收。
+
+
+
+**5.示例代码**
+
+vueEvent.js
+
+```
+import Vue from 'vue'
+var vueEvents = new Vue();
+export default vueEvents;
+```
+
+
+
+兄弟组件C(广播者)
+
+```
+import vueEvents from '../Model/vueEvent.js'
+
+sendEmit(){
+      var numbery =  (Math.random()+300).toFixed(3);
+      vueEvents.$emit('notifyToNew',this.homeMsg+numbery);
+ }
+```
+
+
+
+兄弟组件D(接收者)
+
+```
+import vueEvents from '../Model/vueEvent.js'
+mounted(){
+     var _this = this;
+     vueEvents.$on("notifyToNew",function(data_P){
+            //注意this的作用域
+           console.log('广播传过来的值是'+data_P);
+          _this.receive = data_P;
+    })
+}
+```
+
+
+
+####  五、本地传值--Vuex 状态管理
 
 ```
 状态管理模式。它采用集中式存储管理应用的所有组件的状态。中大型单页应用，你可能会考虑如何把组件的共享状态抽取出来，以一个全局单例模式管理，不管在哪个组件，都能获取状态/触发行为
 ```
 
 ------
+
+**准备工作**
+
+1 src新建一个vuex文件夹
+2 vuex文件夹里新建一个store.js
+3 安装vuex  `npm install vuex --save`
+4 在刚才创建的store.js 中引入vue、vuex 引入vuex 并且use
+
+
 
  **导入**
 
@@ -569,3 +992,156 @@ this.$store.dispatch("incrementActions", 5)//括号mutations里事件名,5是传
 ```
 
  **Module** 
+
+
+
+
+
+**JS自带的本地存储`localStorage`**
+
+`localStorage`： String(可通过`JSON`进行json数据与String之间的转化)
+
+存:
+
+```
+localStorage.setItem('tolist',JSON.stringify(this.tolist));
+```
+
+取：
+
+```
+var tolist = JSON.parse(localStorage.getItem('tolist'));
+```
+
+
+
+#### 六、路由传值
+
+**注意：**
+
+1.父组件push使用this.$router.push
+2.在子组件中获取参数的时候是this.$route.params
+
+
+
+**1 、动态路由传值**
+
+```
+  1.1 配置动态路由
+      routes:[
+         //动态路由参数  以冒号开头
+         {path:'/user/:id',conponent:User}
+       ]
+
+   1.2 传值
+     第一种写法 :  <router-link :to="'/user/'+item.id">传值</router-link>
+     第二种写法 : goToUser(id) {
+                    this.$router.push( {path:'/user/'+id});
+                  }
+   1.3 在对应页面取值
+       this.$route.params;  //结果:{id:123}
+```
+
+
+
+**2、 Get传值(类似HTMLGet传值）**
+
+```
+ 2.1 配置路由
+     const routes = [{path:'/user',component:User},]
+ 2.2 传值  
+     第一种写法 : <router-link :to="'/user/?id='+item.id">传值</router-link>
+     第二种写法 : goToUser(id) {
+                        //'user' 是路径名称
+                      this.$router.push({path:'user',query:{ID:id}});
+                  }
+ 2.3 在对应页面取值
+     this.$route.query;  //结果 {id:123}
+```
+
+Tips：路径传递参数会拼接在URL路径后
+
+
+
+**3 、命名路由push传值**
+
+```
+3.1 配置路由
+   const routes = [{path:'/user',name: 'User',component:User},]
+3.2 传值  
+        goToUser(id) {
+                //'User' 是路径重命名
+              this.$router.push({name:'User',params:{ID:id}});
+           }
+3.3 在对应页面取值
+       this.$route.params;  //结果:{id:123}
+```
+
+Tips：命名路由传递参数不在URL路径拼接显示
+
+
+
+#### 七、跨级访问爷组件数据 -- provide与inject
+
+**1.成对出现：**provide和inject是成对出现的
+
+**2.作用**：用于父组件向子孙组件传递数据
+
+**3.使用方法：**provide在父组件中返回要传给下级的数据，inject在需要使用这个数据的子辈组件或者孙辈等下级组件中注入数据。
+
+**4.使用场景：**由于vue有$parent属性可以让子组件访问父组件。但孙组件想要访问祖先组件就比较困难。通过provide/inject可以轻松实现**跨级访问父组件**的数据
+
+**5.示例代码**
+
+父组件
+
+```
+<template>
+    <div>
+        <inject-test></inject-test>
+    </div>
+</template>
+<script>
+    import InjectTest from "./injectTest";
+    export default{
+        components: {InjectTest},
+        name: 'ProvideTest',
+        provide(){
+            return {
+                parentTest:this//通过provide提供自身所有属性
+            }
+        },
+        methods: {
+            printMessage(msg){
+                alert(msg)
+            }
+        }
+    }
+</script>
+```
+
+子组件或孙组件
+
+```
+<template>
+    <div>
+        <button  @click="handleClick">点击我调用父组件方法</button>
+    </div>
+</template>
+<script>
+    export default{
+        name: 'InjectTest',
+        inject:['parentTest'],
+        data(){
+            return {}
+        },
+        methods: {
+            //子组件调用父组件方法
+            handleClick(){
+                this.parentTest.printMessage("message!")
+            }
+        }
+    }
+</script>
+```
+
