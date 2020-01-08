@@ -582,7 +582,7 @@ Vue.http.interceptors.push((req,next)=>{
 
 在介绍组件传值之前先明确三种组件关系：父子组件、兄弟组件、无关系组件
 
-![](E:\myProject\notes\img\Vue组件关系图.jpg)
+![](.\img\Vue组件关系图.jpg)
 
 
 
@@ -671,7 +671,7 @@ props:{
         <button @click="run()">点击调用父组件方法</button>
         <button @click="getPrasent()">点击获取父组件实体（实体拿到可以使用用父组件的方法和属性了）</button>
     </div>
-</template>
+</template> 
 
 <script>
 export default {
