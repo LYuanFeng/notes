@@ -52,6 +52,186 @@ try {
 
 
 
+### promise 
+
+**1、promise是什么？**
+
+```
+(1)主要用于异步计算
+(2)可以将异步操作队列化，按照期望的顺序执行，返回符合预期的结果
+(3)可以在对象之间传递和操作promise，帮助我们处理队列
+(4)Promise的出现让我们告别回调函数，写出更优雅的异步代码
+```
+
+**2、为什么会有promise？**
+
+```
+为了避免界面冻结（任务）
+同步：
+假设你去了一家饭店，找个位置，叫来服务员，这个时候服务员对你说，对不起我是“同步”服务员，我要服务完这张桌子才能招呼你。那桌客人明明已经吃上了，你只是想要个菜单，这么小的动作，服务员却要你等到别人的一个大动作完成之后，才能再来招呼你，这个便是同步的问题：也就是“顺序交付的工作1234，必须按照1234的顺序完成”。
+异步：
+则是将耗时很长的A交付的工作交给系统之后，就去继续做B交付的工作，。等到系统完成了前面的工作之后，再通过回调或者事件，继续做A剩下的工作。
+AB工作的完成顺序，和交付他们的时间顺序无关，所以叫“异步”。
+```
+
+**3、异步操作的常见语法**
+
+```
+（1）事件监听
+（2）回调
+```
+
+**4、有了nodeJS之后...对异步的依赖进一步加剧了**
+
+```
+大家都知道在nodeJS出来之前PHP、Java、python等后台语言已经很成熟了，nodejs要想能够有自己的一片天，那就得拿出点自己的绝活：
+无阻塞高并发，是nodeJS的招牌，要达到无阻塞高并发异步是其基本保障
+举例：查询数据从数据库，PHP第一个任务查询数据，后面有了新任务，那么后面任务会被挂起排队；而nodeJS是第一个任务挂起交给数据库去跑，然后去接待第二个任务交给对应的系统组件去处理挂起，接着去接待第三个任务...那这样子的处理必然要依赖于异步操作
+```
+
+**5、异步回调的问题：**
+
+```
+、之前处理异步是通过纯粹的回调函数的形式进行处理
+、很容易进入到回调地狱中，剥夺了函数return的能力
+、问题可以解决，但是难以读懂，维护困难
+、稍有不慎就会踏入回调地狱 - 嵌套层次深，不好维护
+、一般情况我们一次性调用API就可以完成请求。
+、有些情况需要多次调用服务器API，就会形成一个链式调用，比如为了完成一个功能，我们需要调用API1、API2、API3，依次按照顺序进行调用，这个时候就会出现回调地狱的问题
+```
+
+**6、promise的引入**
+
+```
+、promise是一个对象，对象和函数的区别就是对象可以保存状态，函数不可以（闭包除外）
+、并未剥夺函数return的能力，因此无需层层传递callback，进行回调获取数据
+、代码风格，容易理解，便于维护
+、多个异步等待合并便于解决
+```
+
+**7、promise详解**
+
+```
+new Promise(
+  function (resolve, reject) {
+  	setTimeout(function() {
+        // 一段耗时的异步操作
+        resolve('成功') // 数据处理完成
+        // reject('失败') // 数据处理出错
+    }, 10000);
+  }
+).then(
+  (res) => {console.log(res)},  // 成功
+  (err) => {console.log(err)} // 失败
+)
+console.log('因为不是异步的，这句会执行比Promise快') //执行顺序1
+```
+
+上面代码console执行顺序：
+
+以为Promise是异步，不影响外面代码执行
+
+```
+因为不是异步的，这句会执行比Promise快
+成功
+```
+
+代码解读
+
+```
+resolve作用是，将Promise对象的状态从“未完成”变为“成功”（即从 pending 变为 resolved），在异步操作成功时调用，并将异步操作的结果，作为参数传递出去；
+reject作用是，将Promise对象的状态从“未完成”变为“失败”（即从 pending 变为 rejected），在异步操作失败时调用，并将异步操作报出的错误，作为参数传递出去。
+```
+
+```
+promise有三个状态：
+1、pending[待定]初始状态
+2、fulfilled[实现]操作成功
+3、rejected[被否决]操作失败
+当promise状态发生改变，就会触发then()里的响应函数处理后续步骤；
+promise状态一经改变，不会再变。
+```
+
+```
+Promise对象的状态改变，只有两种可能：
+从pending变为fulfilled
+从pending变为rejected。
+这两种情况只要发生，状态就凝固了，不会再变了。
+```
+
+
+
+### Async/Await
+
+**1、Async/Await简介**
+
+```
+async/await是写异步代码的新方式，优于回调函数和Promise。
+
+async/await是基于Promise实现的，它不能用于普通的回调函数。===》（函数前面多了一个 async 关键字。await 关键字只能用在 async 定义的函数内。async 函数会隐式地返回一个 promise，该 promise 的 reosolve 值就是函数 return 的值。）
+
+async/await与Promise一样，是非阻塞的。
+
+async/await使得异步代码看起来像同步代码，再也没有回调函数。但是改变不了JS单线程、异步的本质。
+```
+
+**2、Async/Await的用法**
+
+使用await，函数必须用async标识
+
+await后面跟的是一个Promise实例
+
+```
+function getTimeout(time) {
+        return new Promise(function(yes, no) {
+           setTimeout(() => {
+              yes('传哥');
+           }, time);
+        });
+    }
+
+    // 上面使用promise解决了异步回调嵌套不好维护的问题,
+    // 但是我们还有更好方式书写上面的代码
+    // async函数相当于使用同步的方式书写异步代码
+    async function fn() {
+        // await会等待promise成功,成功后在会向下走,直到遇到下一个await
+        let a = await getTimeout(5000);
+        console.log(`第一个定时器执行完毕了__${a}`);
+        await getTimeout(3000);
+        console.log('第二个定时器执行完毕了');
+        console.log('加多少代码都可以');
+        console.log('加多少代码都可以');
+        await getTimeout(1000);
+        console.log('第二个定时器执行完毕了');
+    }
+
+    fn();
+```
+
+当函数执行的时候，一旦遇到 await 就会先返回，等到触发的异步操作完成，再接着执行函数体内后面的语句。
+
+**3、为什么 Async/Await 更好？**
+
+```
+1. 简洁
+由示例可知，使用 Async/Await 明显节约了不少代码。我们不需要写.then，不需要写匿名函数处理 Promise 的 resolve 值，也不需要定义多余的 data 变量，还避免了嵌套代码。这些小的优点会迅速累计起来，这在之后的代码示例中会更加明显。
+
+2. 错误处理
+Async/Await 让 try/catch 可以同时处理同步和异步错误。在下面的 promise 示例中，try/catch 不能处理 JSON.parse 的错误，因为它在 Promise 中。我们需要使用.catch，这样错误处理代码非常冗余。并且，在我们的实际生产代码会更加复杂。
+使用 async/await 的话，catch 能处理 JSON.parse 错误:
+const makeRequest = async () => {
+    try {
+        // this parse may fail
+        const data = JSON.parse(await getJSON());
+        console.log(data);
+    } catch (err) {
+        console.log(err);
+    }
+};
+```
+
+
+
 ### 数组与字符串的转换
 
 ##### 数组转字符串
@@ -125,7 +305,7 @@ src.substr(7,3)//off
 ​	var r = arr.filter((item,index, self) => {return item >= 5 ?  false :  true;}) 
 	// r = [5, 6]
 	
-2》map() 遍历。不改变源数组，返回一个新的被改变过值之后的数组（map需return）。三个参数 (当前元素, 索引,  当前数组)
+2》map() 遍历。不改变源数组，返回一个新的被改变过值之后的数组（map需return）。三个参数 (当前元素, 索引,  当前数组)实际上对数组的每个元素都遍历一次，同时返回一个新的值。记住一点是返回的这个数据的长度和原始数组长度是一致的。
 ​	var arr1 = [1, 2, 3]
 ​	var arr2 = arr1.map((item,index, self) => {return  item * item}) 
 	// arr2 = [1, 4, 9]   ；  arr1 =  [1, 2, 3]
@@ -447,5 +627,4 @@ console.log(p1); //{name: "某敏", age: 18}
     //a.如果一个函数声明出来仅仅只会被调用一次，就可以写一个自调用函数。
     //b.js中只有函数才能分割作用域， 可以用自调用函数分割作用域。
 ```
-
 

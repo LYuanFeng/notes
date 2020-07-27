@@ -315,12 +315,12 @@ git push -u origin master
 
 　　祝大家猴年长得猴美猴美的，挣得猴多猴多的，心情猴好猴好的，运气猴顺猴顺的，睡觉猴香猴香的，爱情猴甜猴甜的，总之，一切都猴蜜猴蜜的!
 
-　　
 
-推荐阅读和参考：
 
-[缪雪峰的git教程](http://www.liaoxuefeng.com/wiki/0013739516305929606dd18361248578c67b8067c8c017b000)
+### 五、Git命令
 
-[git与svn的五个基本区别](http://www.vaikan.com/5-fundamental-differences-between-git-svn/)
+git branch --》查看当前分支
 
-[Git客户端图文详解 如何安装配置GitHub操作流程攻略](http://www.ihref.com/read-16377.html)
+git branch -a --》查看所有分支
+
+git fetch --all --》更新本地分支类别（如果新增的分支，需要在本地这样才能看到）

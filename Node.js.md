@@ -88,6 +88,127 @@ process.argv node运行的时候，输入的命令是怎么样的
 			module.exports = 成员
 ```
 
+
+
+### fs文件模块
+
+##### 文件读取（readFile，readFileSync）
+
+```
+1、异步读取fs.readFile；
+​语法：fs.readFile(filename, [encoding], [callback(err,data)])
+​接收参数：
+filename    文件路径
+options     option对象，包含 encoding，编码格式，该项是可选的。
+callback    回调，传递2个参数 异常err 和 文件内容 data
+​eg:
+var fs = require('fs'); 
+fs.readFile('content.txt','utf-8', function(err,data){ 
+ if(err){ 
+  console.log(err); 
+ }else{ 
+  console.log(data); 
+ } 
+})
+
+2、同步读取fs.readFileSync
+​语法：fs.readFileSync(filename, [encoding])
+​接收参数：
+filename    文件路径
+options     option对象，包含 encoding，编码格式，该项是可选的。
+​eg:
+var fs = require('fs');
+var contentText = fs.readFileSync('123.txt','utf-8'); 
+console.log(contentText)
+```
+
+##### 读取目录列表（readdir， readdirSync）
+
+```
+1、异步读取fs.readdir;
+​语法：fs.readdir(path, [callback(err,files)])
+​接收参数：
+path  目录路径
+callback   回调，传递两个参数 err 和 files，files是一个包含 “ 指定目录下所有文件名称的” 数组。
+​eg:
+var fs = require('fs');
+fs.readdir('readdirtest', function(err,files){
+ if(err){
+  console.log(err);
+ }
+ console.log(files);
+})
+
+2、同步读取fs.readdirSync
+​语法：fs.readdirSync(path)
+​eg:
+var fs = require('fs');
+var readDir = fs.readdirSync('readdirtest11');
+console.log(readDir);
+```
+
+##### 文件写入（writeFile，writeFileSync）
+
+```
+1、异步读取fs.writeFile ；
+​语法：fs.writeFile(filename, data, [options], [callback(err)])
+​接收参数：
+filename      (String)            文件名称
+data        (String | Buffer)    将要写入的内容，可以使字符串 或 buffer数据。
+options        (Object)           option数组对象，包含：
+· encoding   (string)            可选值，默认 ‘utf8′，当data使buffer时，该值应该为 ignored。
+· mode         (Number)        文件读写权限，默认值 438
+· flag            (String)            默认值 ‘w'
+callback {Function}  回调，传递一个异常参数err。
+​eg:
+fs.writeFile('message.txt', 'Hello Node', function (err) {
+  if (err) throw err;
+  console.log('It\'s saved!');
+});
+
+2、同步读取fs.writeFileSync
+​语法：fs.writeFileSync(filename, data, [options])
+​接收参数：
+filename      (String)            文件名称
+data        (String | Buffer)    将要写入的内容，可以使字符串 或 buffer数据。
+options        (Object)           option数组对象，包含：
+· encoding   (string)            可选值，默认 ‘utf8′，当data使buffer时，该值应该为 ignored。
+· mode         (Number)        文件读写权限，默认值 438
+· flag            (String)            默认值 ‘w'
+​eg:
+fs.writeFileSync('message.txt', 'Hello Node');
+```
+
+##### 刪除文件（unlink，unlinkSync）
+
+```
+1、异步刪除fs.unlink ；
+​语法：fs.unlink(path, [callback(err)])
+​接收参数：
+path           文件路径
+callback     回调，传递一个异常参数err。
+​eg:
+var fs = require('fs');
+var filepath = '126.txt';
+fs.unlink(filepath, function(err){
+ if(err){
+  throw err;
+ }
+ console.log('文件:'+filepath+'删除成功！');
+})
+
+2、同步刪除fs.unlinkSync ；
+​语法：fs.unlinkSync(filepath);
+​接收参数：
+path           文件路径
+​eg:
+var fs = require('fs');
+var filepath = '126.txt';
+fs.unlinkSync(filepath);
+```
+
+
+
 ### 创建服务器流程
 
 ```

@@ -1391,3 +1391,48 @@ Tips：命名路由传递参数不在URL路径拼接显示
 
 ![](.\img\作用域插槽.png)
 
+
+
+
+
+### Vue -- watch用法
+
+**作用：**watch的作用可以监控一个值的变换，并调用因为变化需要执行的方法。可以通过watch动态改变关联的状态。
+
+```
+data:{
+     test1:1,
+     test2:{
+         test3:1
+     },
+     test4: '调用函数',
+     test5:{
+     	test6: '监听对象属性'
+     }
+ },
+ methods: {
+ 	test4fun() {
+ 		console.log("你好")
+ 	}
+ },
+ watch:{
+     test1(val, oldVal){//普通的watch监听
+         console.log("a: "+val, oldVal);
+     },
+     test2:{//深度监听，可监听到对象、数组的变化
+         handler(val, oldVal){
+             console.log("b.c: "+val.test3, oldVal.test3);
+         },
+         deep:true, //true 深度监听
+         immediate: true, //首次给被监测的实例赋初始值时是否执行handler处理
+     },
+     test4: 'test4fun',//绑定方法
+     //如果想监听对象的内部某一个属性值的变化，可以设置deep：ture，这时监听器会给对象内部的所有属性加上watch，如果对象内部层级有多级，且会逐层添加，所以会对性能的影响较大，这时候我们可以考虑采用键路径的方式实现。
+	'test5.test6':{//键路径的方式实现监听
+         handler(val, oldVal){
+             console.log("b.c: "+val.test3, oldVal.test3);
+         }
+     },
+ }
+```
+
